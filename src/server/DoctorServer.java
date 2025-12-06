@@ -35,7 +35,9 @@ public class DoctorServer {
         server = createServer(host, port);
         registerCommonHandlers();
 
-        registerGet("/", new HomeBooksHandler(appointments, patients));
+        registerGet("/", new HomeBooksHandler(patients));
+        registerGet("/day", new DayHandler(patients));
+
 
 
 //        registerGet("/borrow", new BorrowBookHandler(appointemts, employees));

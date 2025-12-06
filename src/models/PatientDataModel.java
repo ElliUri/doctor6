@@ -12,10 +12,15 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PatientDataModel {
+
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
 
     private final Path path = Path.of("data/json/patient.json");
     private final Gson gson = new GsonBuilder()
@@ -73,5 +78,44 @@ public class PatientDataModel {
 
     public List<Patient> getAll() {
         return patients;
+    }
+
+
+    public List<Appointment> getAppointmentsForDate(LocalDate date) {
+        List<Appointment> result = new ArrayList<>();
+
+        for (Patient p : patients) {
+            if (p.getAppointmentDate() != null &&
+                    LocalDate.parse(p.getAppointmentDate(), dateFormatter).equals(date)) {
+                result.add(new Appointment(p.getAppointmentTime(), p));
+            }
+        }
+
+        result.sort(null);
+        return result;
+    }
+
+    public List<Patient> getAllForDate(LocalDate date) {
+        List<Patient> result = new ArrayList<>();
+
+        for (Patient p : patients) {
+            if (p.getAppointmentDate() != null) {
+                try {
+                    LocalDate patientDate = LocalDate.parse(p.getAppointmentDate(), dateFormatter);
+                    if (patientDate.equals(date)) {
+                        result.add(p);
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+        }
+
+        result.sort((p1, p2) -> {
+            String t1 = p1.getAppointmentTime() != null ? p1.getAppointmentTime() : "00:00";
+            String t2 = p2.getAppointmentTime() != null ? p2.getAppointmentTime() : "00:00";
+            return t1.compareTo(t2);
+        });
+
+        return result;
     }
 }
