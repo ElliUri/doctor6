@@ -66,7 +66,7 @@ public class PatientDataModel {
     }
 
     public boolean addPatient(Patient patient) {
-        return true;
+        return patients.add(patient);
     }
 
     public Patient getUserById(int id) {
@@ -83,7 +83,6 @@ public class PatientDataModel {
 
     public List<Appointment> getAppointmentsForDate(LocalDate date) {
         List<Appointment> result = new ArrayList<>();
-
         for (Patient p : patients) {
             if (p.getAppointmentDate() != null &&
                     LocalDate.parse(p.getAppointmentDate(), dateFormatter).equals(date)) {
@@ -119,4 +118,25 @@ public class PatientDataModel {
 
         return result;
     }
+
+
+    public boolean deletePatient(int id) {
+        Patient target = patients.stream()
+                .filter(p -> p.getId() == id)
+                .findFirst()
+                .orElse(null);
+
+        if (target == null) {
+            return false;
+        }
+
+        boolean removed = patients.remove(target);
+
+        if (removed) {
+            saveUsers();
+        }
+
+        return removed;
+    }
+
 }

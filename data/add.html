@@ -3,33 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <title>Добавить пациента</title>
+
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+
+        .error-input {
+            border: 2px solid red !important;
+            background: #ffe6e6;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        label { display: block; margin-top: 15px; }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 3px;
+            box-sizing: border-box;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+        }
+    </style>
 </head>
 <body>
 
-<h2>Добавить пациента на ${day}.${month}.${year}</h2>
+<h2>Добавить пациента</h2>
+
+<a href="/day?date=${date}">← Назад</a>
+<br><br>
 
 <form method="post" action="/add">
-    <input type="hidden" name="day" value="${date}" />
+    <input type="hidden" name="date" value="${date}">
 
-    Время (hh:mm): <br>
-    <input name="time"><br><br>
+    <label>Время:
+        <input type="time" name="time"
+               value="${time!}"
+               class="${(errorTime)?string('error-input','')}">
+    </label>
+    <#if errorTime??><div class="error-message">Укажите время</div></#if>
 
-    ФИО: <br>
-    <input name="fullName"><br><br>
+<label>ФИО:
+    <input type="text" name="fullName"
+           value="${fullName!}"
+           class="${(errorFullName)?string('error-input','')}">
+</label>
+<#if errorFullName??><div class="error-message">Введите ФИО</div></#if>
 
-    Дата рождения: <br>
-    <input name="birthDate"><br><br>
+<label>Дата рождения:
+    <input type="date" name="birthDate"
+           value="${birthDate!}"
+           class="${(errorBirthDate)?string('error-input','')}">
+</label>
+<#if errorBirthDate??><div class="error-message">Введите дату рождения</div></#if>
 
-    Тип пациента:<br>
-    <select name="type">
-        <option value="PRIMARY">Первичный</option>
-        <option value="SECONDARY">Вторичный</option>
-    </select><br><br>
+<label>Тип пациента:
+    <select name="type" class="${(errorType)?string('error-input','')}">
+        <option value="">Выберите тип</option>
+        <option value="PRIMARY" <#if type?string == "PRIMARY">selected</#if>>Первичный</option>
+    <option value="SECONDARY" <#if type?string == "SECONDARY">selected</#if>>Повторный</option>
 
-    Анамнез:<br>
-    <textarea name="anamnesis"></textarea><br><br>
+</select>
+</label>
+<#if errorType??><div class="error-message">Выберите тип пациента</div></#if>
 
-    <button type="submit">Добавить</button>
+<label>Анамнез:
+    <textarea name="anamnesis" rows="4">${anamnesis!}</textarea>
+</label>
+
+<button type="submit">Сохранить</button>
 </form>
 
 </body>

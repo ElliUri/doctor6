@@ -1,13 +1,11 @@
 package handlers;
 
 import com.sun.net.httpserver.HttpExchange;
-import models.Appointment;
 import models.PatientDataModel;
 import server.DoctorServer;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.YearMonth;
 import java.util.*;
 
 public class HomeBooksHandler implements RouteHandler {
@@ -43,6 +41,4 @@ public class HomeBooksHandler implements RouteHandler {
         DoctorServer.renderTemplate(exchange, "month.html", model);
 
     }
-
-
 }

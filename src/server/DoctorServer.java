@@ -7,6 +7,7 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 import handlers.*;
+import handlers.DeleteHandler;
 import models.PatientDataModel;
 import utils.Utils;
 
@@ -39,7 +40,7 @@ public class DoctorServer {
         registerGet("/add", new AddHandler(patients));
         registerPost("/add", new AddHandler(patients));
 
-
+        registerGet("/delete", new DeleteHandler(patients));
 
 
     }
@@ -132,10 +133,6 @@ public class DoctorServer {
     private void handleIncomingServerRequests(HttpExchange exchange) throws IOException {
         var route = getRoutes().getOrDefault(makeKey(exchange), notFoundHandler);
         route.handle(exchange);
-    }
-
-    public static String getRequestBody(HttpExchange exchange) {
-        return Utils.getRequestBody(exchange);
     }
 
     private static Configuration initFreeMarker() {

@@ -1,1 +1,46 @@
-[]
+[
+  {
+    "id": 1,
+    "appointmentTime": "10:30",
+    "fullName": "Урманова Элдана Полотбековна",
+    "birthDate": "2007-04-04",
+    "type": "PRIMARY",
+    "anamnesis": "вамвам",
+    "phone": "",
+    "address": "",
+    "appointmentDate": "2025-12-11"
+  },
+  {
+    "id": 3,
+    "appointmentTime": "09:30",
+    "fullName": "Урманова Элдана Полотбековна",
+    "birthDate": "2006-05-31",
+    "type": "PRIMARY",
+    "anamnesis": "fvdfvd",
+    "phone": "",
+    "address": "",
+    "appointmentDate": "2025-12-12"
+  },
+  {
+    "id": 5,
+    "appointmentTime": "03:30",
+    "fullName": "Лида Омурбекова ",
+    "birthDate": "2003-04-30",
+    "type": "PRIMARY",
+    "anamnesis": "вамвм",
+    "phone": "",
+    "address": "",
+    "appointmentDate": "2025-12-12"
+  },
+  {
+    "id": 6,
+    "appointmentTime": "03:30",
+    "fullName": "Лида Омурбекова Саева",
+    "birthDate": "2004-03-22",
+    "type": "PRIMARY",
+    "anamnesis": "мвмым",
+    "phone": "",
+    "address": "",
+    "appointmentDate": "2025-12-12"
+  }
+]

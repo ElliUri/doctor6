@@ -8,7 +8,6 @@ import server.DoctorServer;
 import utils.Utils;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,23 +37,24 @@ public class AddHandler implements RouteHandler {
 
         LocalDate date;
         try {
-            if (params.containsKey("date")) {
-                date = LocalDate.parse(params.get("date"));
-            } else {
-                int day = Integer.parseInt(params.getOrDefault("d", String.valueOf(LocalDate.now().getDayOfMonth())));
-                int month = Integer.parseInt(params.getOrDefault("m", String.valueOf(LocalDate.now().getMonthValue())));
-                int year = Integer.parseInt(params.getOrDefault("y", String.valueOf(LocalDate.now().getYear())));
-                date = LocalDate.of(year, month, day);
-            }
+            date = LocalDate.parse(params.getOrDefault("date", LocalDate.now().toString()));
         } catch (Exception e) {
             date = LocalDate.now();
         }
 
         Map<String, Object> model = new HashMap<>();
+        model.put("date", date.toString());
         model.put("day", date.getDayOfMonth());
         model.put("month", date.getMonthValue());
         model.put("year", date.getYear());
-        model.put("date", date.toString());
+
+        model.put("errorTime", false);
+        model.put("errorFullName", false);
+        model.put("errorBirthDate", false);
+        model.put("errorType", false);
+
+        model.put("type", "");
+
 
         DoctorServer.renderTemplate(exchange, "add.html", model);
     }
@@ -63,45 +63,86 @@ public class AddHandler implements RouteHandler {
         String body = Utils.getRequestBody(exchange);
         Map<String, String> form = Utils.parsedUrlEncoded(body, "&");
 
+        String dateStr = form.get("date");
+        String time = form.get("time");
+        String fullName = form.get("fullName");
+        String birthDate = form.get("birthDate");
+        String anamnesis = form.get("anamnesis");
+        String typeStr = form.get("type");
+
+        LocalDate appointmentDate;
+
         try {
-            String dateStr = form.get("day");
-            String time = form.get("time");
-            String fullName = form.get("fullName");
-            String birthDate = form.get("birthDate");
-            PatientType type = PatientType.valueOf(form.get("type"));
-            String anamnesis = form.get("anamnesis");
-
-            LocalDate appointmentDate = LocalDate.parse(dateStr);
-
-            if (appointmentDate.isBefore(LocalDate.now())) {
-                DoctorServer.renderTemplate(exchange, "error.html",
-                        Map.of("message", "Нельзя добавить пациента на прошедшую дату"));
-                return;
-            }
-
-            int id = patients.getAll().stream().mapToInt(Patient::getId).max().orElse(0) + 1;
-
-            Patient newPatient = new Patient(
-                    id,
-                    time,
-                    fullName,
-                    birthDate,
-                    type,
-                    anamnesis,
-                    "",
-                    "",
-                    appointmentDate.toString()
-            );
-
-            patients.addPatient(newPatient);
-            patients.saveUsers();
-
-            exchange.getResponseHeaders().add("Location", "/day?date=" + appointmentDate);
-            exchange.sendResponseHeaders(HttpURLConnection.HTTP_SEE_OTHER, -1);
-
+            appointmentDate = LocalDate.parse(dateStr);
         } catch (Exception e) {
-            DoctorServer.renderTemplate(exchange, "error.html",
-                    Map.of("message", "Ошибка при добавлении пациента: " + e.getMessage()));
+            appointmentDate = LocalDate.now();
         }
+
+        Map<String, Object> model = new HashMap<>();
+        boolean hasErrors = false;
+
+        model.put("date", appointmentDate.toString());
+        model.put("time", time);
+        model.put("fullName", fullName);
+        model.put("birthDate", birthDate);
+        model.put("anamnesis", anamnesis);
+        model.put("type", typeStr);
+
+        model.put("errorTime", false);
+        model.put("errorFullName", false);
+        model.put("errorBirthDate", false);
+        model.put("errorType", false);
+
+
+        if (time == null || time.isBlank()) {
+            model.put("errorTime", true);
+            hasErrors = true;
+        }
+        if (fullName == null || fullName.isBlank()) {
+            model.put("errorFullName", true);
+            hasErrors = true;
+        }
+        if (birthDate == null || birthDate.isBlank()) {
+            model.put("errorBirthDate", true);
+            hasErrors = true;
+        }
+        if (typeStr == null || typeStr.isBlank()) {
+            model.put("errorType", true);
+            hasErrors = true;
+        }
+
+        if (hasErrors) {
+            DoctorServer.renderTemplate(exchange, "add.html", model);
+            return;
+        }
+
+        PatientType type = PatientType.valueOf(typeStr);
+        int id = patients.getAll().stream().mapToInt(Patient::getId).max().orElse(0) + 1;
+
+        Patient newPatient = new Patient(
+                id,
+                time == null ? "00:00" : time,
+                fullName == null ? "" : fullName,
+                birthDate == null ? "" : birthDate,
+                type,
+                anamnesis == null ? "" : anamnesis,
+                "",
+                "",
+                appointmentDate.toString()
+        );
+
+
+        patients.addPatient(newPatient);
+        patients.saveUsers();
+
+        Map<String, Object> modelDay = Map.of(
+                "date", appointmentDate.toString(),
+                "day", appointmentDate.getDayOfMonth(),
+                "month", appointmentDate.getMonthValue(),
+                "year", appointmentDate.getYear(),
+                "appointments", patients.getAllForDate(appointmentDate)
+        );
+
+        DoctorServer.renderTemplate(exchange, "day.html", modelDay);
     }
 }

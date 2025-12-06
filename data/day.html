@@ -3,6 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <title>Записи на день</title>
+
+    <style>
+        body { font-family: Arial; padding: 20px; }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 5px;
+            color: white;
+            font-size: 13px;
+        }
+
+        .first { background: #28a745; }   /* зелёный */
+        .repeat { background: #007bff; }  /* синий */
+    </style>
 </head>
 <body>
 
@@ -30,13 +44,29 @@
 
     <#list appointments as a>
     <tr>
-        <td>${a.time}</td>
-        <td>${a.patient.fullName}</td>
-        <td>${a.patient.type}</td>
-        <td>${a.patient.anamnesis}</td>
+        <#if a.patient??>
+        <td>${a.time!"00:00"}</td>
+        <td>${a.patient.fullName!"Без имени"}</td>
+
         <td>
-            <a href="/delete?day=${day}&time=${a.time}">Удалить</a>
+            <#if a.patient.type?string == "PRIMARY">
+            <span class="badge first">Первичный</span>
+            <#elseif a.patient.type?string == "SECONDARY">
+            <span class="badge repeat">Повторный</span>
+            <#else>
+            Неизвестно
+        </#if>
         </td>
+
+        <td>${a.patient.anamnesis!""}</td>
+
+        <td>
+            <a href="/delete?id=${a.patient.id}&date=${date}"
+               onclick="return confirm('Удалить пациента?')">Удалить</a>
+        </td>
+        <#else>
+        <td colspan="5">Ошибка: данные пациента отсутствуют</td>
+    </#if>
     </tr>
 </#list>
 

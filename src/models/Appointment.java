@@ -1,11 +1,11 @@
 package models;
 
 public class Appointment implements Comparable<Appointment> {
-    private String time;
-    private Patient patient;
+    private final String time;
+    private final Patient patient;
 
     public Appointment(String time, Patient patient) {
-        this.time = time;
+        this.time = (time == null || time.isBlank()) ? "00:00" : time;
         this.patient = patient;
     }
 
