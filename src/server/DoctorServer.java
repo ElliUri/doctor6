@@ -9,6 +9,7 @@ import freemarker.template.TemplateExceptionHandler;
 import handlers.*;
 import models.AppointmentDataModel;
 import models.PatientDataModel;
+import utils.Utils;
 
 import java.io.*;
 import java.net.InetSocketAddress;

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Расписание врача</title>
+    <style>
+        .today { background-color: #ffdf91; padding: 5px; border-radius: 4px; }
+        .primary { color: blue; }
+        .secondary { color: green; }
+        table { border-collapse: collapse; width: 80%; margin: auto; }
+        td, th { border: 1px solid #ccc; padding: 10px; text-align: center; }
+    </style>
+</head>
+<body>
+
+<h2 style="text-align:center;">Расписание врача на ${month}/${year}</h2>
+
+<table>
+    <tr>
+        <th>День</th>
+        <th>Пациенты</th>
+    </tr>
+
+    <#list days as d>
+    <tr>
+        <td>
+            <a href="/day?d=${d.day}">${d.day}</a>
+            <#if d.day == today>
+            <span class="today">(Сегодня)</span>
+        </#if>
+        </td>
+        <td>
+            <#if d.appointments?size == 0>
+            Нет записей
+            <#else>
+            <#list d.appointments as a>
+            <div>
+                ${a.time} —
+                <span class="${a.patient.type?lower_case}">
+                                ${a.patient.fullName}
+                            </span>
+                (${a.patient.type})
+            </div>
+        </#list>
+    </#if>
+    </td>
+    </tr>
+</#list>
+
+</table>
+
+</body>
+</html>

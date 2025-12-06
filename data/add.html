@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Добавить пациента</title>
+</head>
+<body>
+
+<h2>Добавить пациента на ${day}.${month}.${year}</h2>
+
+<form method="post" action="/add">
+    <input type="hidden" name="day" value="${day}" />
+
+    Время (hh:mm): <br>
+    <input name="time"><br><br>
+
+    ФИО: <br>
+    <input name="fullName"><br><br>
+
+    Дата рождения: <br>
+    <input name="birthDate"><br><br>
+
+    Тип пациента:<br>
+    <select name="type">
+        <option value="PRIMARY">Первичный</option>
+        <option value="SECONDARY">Вторичный</option>
+    </select><br><br>
+
+    Анамнез:<br>
+    <textarea name="anamnesis"></textarea><br><br>
+
+    <button type="submit">Добавить</button>
+</form>
+
+</body>
+</html>

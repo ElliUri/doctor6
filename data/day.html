@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Записи на день</title>
+</head>
+<body>
+
+<h2>Пациенты на ${day}.${month}.${year}</h2>
+
+<a href="/">← Назад к расписанию</a>
+<br><br>
+
+<a href="/add?day=${day}">+ Добавить пациента</a>
+
+<hr>
+
+<#if appointments?size == 0>
+<p>Нет записей</p>
+<#else>
+
+<table border="1" cellpadding="10">
+    <tr>
+        <th>Время</th>
+        <th>ФИО</th>
+        <th>Тип</th>
+        <th>Анамнез</th>
+        <th>Удалить</th>
+    </tr>
+
+    <#list appointments as a>
+    <tr>
+        <td>${a.time}</td>
+        <td>${a.patient.fullName}</td>
+        <td>${a.patient.type}</td>
+        <td>${a.patient.anamnesis}</td>
+        <td>
+            <a href="/delete?day=${day}&time=${a.time}">Удалить</a>
+        </td>
+    </tr>
+</#list>
+
+</table>
+
+</#if>
+
+</body>
+</html>
