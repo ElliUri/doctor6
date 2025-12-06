@@ -1,5 +1,13 @@
+import server.DoctorServer;
+
+import java.io.IOException;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello, World!");
+        try {
+            new DoctorServer("localhost", 8089).start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

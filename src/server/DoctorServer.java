@@ -1,4 +1,175 @@
 package server;
 
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpServer;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateExceptionHandler;
+import handlers.*;
+import models.AppointmentDataModel;
+import models.PatientDataModel;
+
+import java.io.*;
+import java.net.InetSocketAddress;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+
 public class DoctorServer {
+
+    private final HttpServer server;
+    private final String dataDir = "data";
+    private Map<String, RouteHandler> routes = new HashMap<>();
+    private final RouteHandler notFoundHandler = new NotFoundHandler();
+
+
+    private final static Configuration freemarker = initFreeMarker();
+    private final PatientDataModel patients = new PatientDataModel();
+    private final AppointmentDataModel appointments = new AppointmentDataModel(patients);
+
+
+    public DoctorServer(String host, int port) throws IOException {
+        server = createServer(host, port);
+        registerCommonHandlers();
+
+        registerGet("/", new HomeBooksHandler(appointments, patients));
+
+
+//        registerGet("/borrow", new BorrowBookHandler(appointemts, employees));
+//        registerGet("/return", new ReturnBookHandler(appointemts, employees));
+//
+//        registerGet("/employees", new EmployeesHandler(employees));
+
+    }
+
+    private static HttpServer createServer(String host, int port) throws IOException {
+        var msg = "Starting server on http://%s:%s/%n";
+        System.out.printf(msg, host, port);
+        var address = new InetSocketAddress(host, port);
+        return HttpServer.create(address, 50);
+    }
+
+    private static String makeKey(String method, String route) {
+        return  String.format("%s %s", method.toUpperCase(), route);
+    }
+
+    private static String makeKey(HttpExchange exchange) {
+        var method = exchange.getRequestMethod();
+        var path = exchange.getRequestURI().getPath() ;
+
+        var index = path.lastIndexOf(".");
+        var extOrPath = index != -1 ? path.substring(index).toLowerCase() : path;
+
+        return makeKey(method, extOrPath);
+    }
+
+    private static void setContentType(HttpExchange exchange, ContentType type) {
+        exchange.getResponseHeaders().set("Content-Type", String.valueOf(type));
+    }
+
+    private void registerCommonHandlers() {
+        server.createContext("/", this::handleIncomingServerRequests);
+
+        registerFileHandler(".css", ContentType.TEXT_CSS);
+        registerFileHandler(".html", ContentType.TEXT_HTML);
+        registerFileHandler(".jpg", ContentType.IMAGE_JPEG);
+        registerFileHandler(".png", ContentType.IMAGE_PNG);
+        registerFileHandler(".jpeg", ContentType.IMAGE_JPEG);
+    }
+
+    public final void start() {
+        server.start();
+    }
+
+    protected final void registerGet(String route, RouteHandler handler) {
+        getRoutes().put("GET " + route, handler);
+    }
+    protected final void registerPost(String route, RouteHandler handler) {
+        getRoutes().put("POST " + route, handler);
+    }
+
+    protected final void registerFileHandler(String fileExt, ContentType type) {
+        registerGet(fileExt, exchange -> sendFile(exchange, makeFilePath(exchange), type));
+    }
+
+    protected final Map<String, RouteHandler> getRoutes() {
+        return routes;
+    }
+
+    protected final void sendFile(HttpExchange exchange, Path pathToFile, ContentType contentType) {
+        try {
+            if (Files.notExists(pathToFile)) {
+                notFoundHandler.handle(exchange);
+                return;
+            }
+            var data = Files.readAllBytes(pathToFile);
+            sendByteData(exchange, ResponseCodes.OK, contentType, data);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Path makeFilePath(HttpExchange exchange) {
+        return makeFilePath(exchange.getRequestURI().getPath());
+    }
+
+    protected Path makeFilePath(String... s) {
+        return Path.of(dataDir, s);
+    }
+
+    public static void sendByteData(HttpExchange exchange, ResponseCodes responseCode,
+                                    ContentType contentType, byte[] data) throws IOException {
+        try (var output = exchange.getResponseBody()) {
+            setContentType(exchange, contentType);
+            exchange.sendResponseHeaders(responseCode.getCode(), 0);
+            output.write(data);
+            output.flush();
+        }
+    }
+
+    private void handleIncomingServerRequests(HttpExchange exchange) throws IOException {
+        var route = getRoutes().getOrDefault(makeKey(exchange), notFoundHandler);
+        route.handle(exchange);
+    }
+
+    public static String getRequestBody(HttpExchange exchange) {
+        return Utils.getRequestBody(exchange);
+    }
+
+    private static Configuration initFreeMarker() {
+        try {
+            Configuration cfg = new Configuration(Configuration.VERSION_2_3_29);
+            cfg.setDirectoryForTemplateLoading(new File("data"));
+
+            cfg.setDefaultEncoding("UTF-8");
+            cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+            cfg.setLogTemplateExceptions(false);
+            cfg.setWrapUncheckedExceptions(true);
+            cfg.setFallbackOnNullLoopVariable(false);
+            return cfg;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void renderTemplate(HttpExchange exchange, String templateFile, Object dataModel) {
+        try {
+            Template temp = freemarker.getTemplate(templateFile);
+
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            try (OutputStreamWriter writer = new OutputStreamWriter(stream)) {
+
+                temp.process(dataModel, writer);
+                writer.flush();
+
+                var data = stream.toByteArray();
+
+                sendByteData(exchange, ResponseCodes.OK, ContentType.TEXT_HTML, data);
+            }
+        } catch (IOException | TemplateException e) {
+            e.printStackTrace();
+        }
+    }
 }

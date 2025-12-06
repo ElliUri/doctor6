@@ -1,6 +1,7 @@
 package models;
 
 public class Patient {
+    private int id;
     private String fullName;
     private String birthDate;
     private PatientType type;
@@ -8,13 +9,17 @@ public class Patient {
     private String phone;
     private String address;
 
-    public Patient(String fullName, String birthDate, PatientType type, String anamnesis, String phone, String address) {
+    public Patient(int id, String fullName, String birthDate, PatientType type, String anamnesis, String phone, String address) {
+        this.id = id;
         this.fullName = fullName;
         this.birthDate = birthDate;
         this.type = type;
         this.anamnesis = anamnesis;
         this.phone = phone;
         this.address = address;
+    }
+    public int getId() {
+        return id;
     }
 
     public String getFullName() {
