@@ -78,10 +78,7 @@ public class PatientDataModel {
             }
         }
 
-        System.out.println("Сгенерировано " + patients.size() + " тестовых пациентов");
-        System.out.println("Период: с " + today + " до " + today.plusDays(remainingDays - 1));
-
-        saveUsers(); // Сохраняем сгенерированные данные
+        saveUsers();
     }
 
     private void loadPatiens() {
