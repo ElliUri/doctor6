@@ -7,7 +7,6 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 import handlers.*;
-import models.AppointmentDataModel;
 import models.PatientDataModel;
 import utils.Utils;
 
@@ -28,7 +27,6 @@ public class DoctorServer {
 
     private final static Configuration freemarker = initFreeMarker();
     private final PatientDataModel patients = new PatientDataModel();
-    private final AppointmentDataModel appointments = new AppointmentDataModel(patients);
 
 
     public DoctorServer(String host, int port) throws IOException {
@@ -38,12 +36,11 @@ public class DoctorServer {
         registerGet("/", new HomeBooksHandler(patients));
         registerGet("/day", new DayHandler(patients));
 
+        registerGet("/add", new AddHandler(patients));
+        registerPost("/add", new AddHandler(patients));
 
 
-//        registerGet("/borrow", new BorrowBookHandler(appointemts, employees));
-//        registerGet("/return", new ReturnBookHandler(appointemts, employees));
-//
-//        registerGet("/employees", new EmployeesHandler(employees));
+
 
     }
 

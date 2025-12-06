@@ -95,6 +95,7 @@ public class PatientDataModel {
         return result;
     }
 
+
     public List<Patient> getAllForDate(LocalDate date) {
         List<Patient> result = new ArrayList<>();
 

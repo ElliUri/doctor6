@@ -2,7 +2,6 @@ package handlers;
 
 import com.sun.net.httpserver.HttpExchange;
 import models.Appointment;
-import models.Patient;
 import models.PatientDataModel;
 import server.DoctorServer;
 
@@ -23,31 +22,26 @@ public class HomeBooksHandler implements RouteHandler {
         Map<String, Object> model = new HashMap<>();
 
         LocalDate today = LocalDate.now();
-        int month = today.getMonthValue();
-        int year = today.getYear();
-        int dayOfMonth = today.getDayOfMonth();
-
-        YearMonth yearMonth = YearMonth.of(year, month);
-        int daysInMonth = yearMonth.lengthOfMonth();
+        model.put("today", today.getDayOfMonth());
+        model.put("month", today.getMonthValue());
+        model.put("year", today.getYear());
 
         List<Map<String, Object>> days = new ArrayList<>();
-        for (int d = 1; d <= daysInMonth; d++) {
-            LocalDate date = LocalDate.of(year, month, d);
-            List<Appointment> appointmentsForDay = patients.getAppointmentsForDate(date);
-            appointmentsForDay.sort(Comparator.naturalOrder());
+
+        for (int day = 1; day <= today.lengthOfMonth(); day++) {
+            LocalDate d = LocalDate.of(today.getYear(), today.getMonth(), day);
 
             Map<String, Object> dayMap = new HashMap<>();
-            dayMap.put("day", d);
-            dayMap.put("appointments", appointmentsForDay);
+            dayMap.put("day", day);
+            dayMap.put("date", d);
+            dayMap.put("appointments", patients.getAppointmentsForDate(d));
+
             days.add(dayMap);
         }
 
-        model.put("month", month);
-        model.put("year", year);
-        model.put("today", dayOfMonth);
         model.put("days", days);
-
         DoctorServer.renderTemplate(exchange, "month.html", model);
+
     }
 
 
