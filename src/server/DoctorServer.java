@@ -43,6 +43,7 @@ public class DoctorServer {
         registerGet("/delete", new DeleteHandler(patients));
 
 
+
     }
 
     private static HttpServer createServer(String host, int port) throws IOException {
@@ -72,6 +73,8 @@ public class DoctorServer {
 
     private void registerCommonHandlers() {
         server.createContext("/", this::handleIncomingServerRequests);
+
+        registerGet("/error", new ErrorHandler());
 
         registerFileHandler(".css", ContentType.TEXT_CSS);
         registerFileHandler(".html", ContentType.TEXT_HTML);
@@ -131,8 +134,13 @@ public class DoctorServer {
     }
 
     private void handleIncomingServerRequests(HttpExchange exchange) throws IOException {
-        var route = getRoutes().getOrDefault(makeKey(exchange), notFoundHandler);
-        route.handle(exchange);
+        try {
+            var route = getRoutes().getOrDefault(makeKey(exchange), notFoundHandler);
+            route.handle(exchange);
+        } catch (Exception e) {
+            e.printStackTrace();
+            new ErrorHandler().handle(exchange);
+        }
     }
 
     private static Configuration initFreeMarker() {

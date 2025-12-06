@@ -26,19 +26,22 @@ public class HomeBooksHandler implements RouteHandler {
 
         List<Map<String, Object>> days = new ArrayList<>();
 
-        for (int day = 1; day <= today.lengthOfMonth(); day++) {
+        for (int day = today.getDayOfMonth(); day <= today.lengthOfMonth(); day++) {
             LocalDate d = LocalDate.of(today.getYear(), today.getMonth(), day);
 
-            Map<String, Object> dayMap = new HashMap<>();
-            dayMap.put("day", day);
-            dayMap.put("date", d);
-            dayMap.put("appointments", patients.getAppointmentsForDate(d));
+            Map<String, Object> dayModel = new HashMap<>();
+            dayModel.put("day", day);
+            dayModel.put("date", d);
+            dayModel.put("appointments", patients.getAppointmentsForDate(d));
 
-            days.add(dayMap);
+            dayModel.put("isToday", day == today.getDayOfMonth());
+
+            dayModel.put("canBook", !d.isBefore(today));
+
+            days.add(dayModel);
         }
 
         model.put("days", days);
         DoctorServer.renderTemplate(exchange, "month.html", model);
-
     }
 }

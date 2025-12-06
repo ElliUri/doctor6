@@ -22,11 +22,19 @@ public class Patient {
         this.address = address;
         this.appointmentDate = appointmentDate;
     }
-    public String getAppointmentDate() { return appointmentDate; }
-    public String getAppointmentTime() { return appointmentTime; }
+    public String getAppointmentDate() {
+        return appointmentDate;
+    }
+    public String getAppointmentTime() {
+        return appointmentTime;
+    }
 
-    public void setAppointmentDate(String appointmentDate) { this.appointmentDate = appointmentDate; }
-    public void setAppointmentTime(String appointmentTime) { this.appointmentTime = appointmentTime; }
+    public void setAppointmentDate(String appointmentDate) {
+        this.appointmentDate = appointmentDate;
+    }
+    public void setAppointmentTime(String appointmentTime) {
+        this.appointmentTime = appointmentTime;
+    }
     public int getId() {
         return id;
     }

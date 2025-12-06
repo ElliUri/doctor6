@@ -62,11 +62,4 @@ public class Utils {
         return "";
     }
 
-    public static Patient getAuthorizedPatient(HttpExchange exchange, PatientDataModel employeeData)  {
-        String sessionId = Cookie.get(exchange, "sessionId");
-        Integer employeeId = Cookie.getUserBySession(sessionId);
-        if (sessionId == null || employeeId == null) return null;
-        return employeeData.getUserById(employeeId);
-    }
-
 }

@@ -52,9 +52,10 @@ public class AddHandler implements RouteHandler {
         model.put("errorFullName", false);
         model.put("errorBirthDate", false);
         model.put("errorType", false);
+        model.put("errorDate", false);
+        model.put("errorMessage", "");
 
         model.put("type", "");
-
 
         DoctorServer.renderTemplate(exchange, "add.html", model);
     }
@@ -82,6 +83,10 @@ public class AddHandler implements RouteHandler {
         boolean hasErrors = false;
 
         model.put("date", appointmentDate.toString());
+        model.put("day", appointmentDate.getDayOfMonth());
+        model.put("month", appointmentDate.getMonthValue());
+        model.put("year", appointmentDate.getYear());
+
         model.put("time", time);
         model.put("fullName", fullName);
         model.put("birthDate", birthDate);
@@ -92,7 +97,14 @@ public class AddHandler implements RouteHandler {
         model.put("errorFullName", false);
         model.put("errorBirthDate", false);
         model.put("errorType", false);
+        model.put("errorDate", false);
+        model.put("errorMessage", "");
 
+        if (appointmentDate.isBefore(LocalDate.now())) {
+            model.put("errorDate", true);
+            model.put("errorMessage", "Нельзя записаться на прошедшую дату!");
+            hasErrors = true;
+        }
 
         if (time == null || time.isBlank()) {
             model.put("errorTime", true);
@@ -121,9 +133,9 @@ public class AddHandler implements RouteHandler {
 
         Patient newPatient = new Patient(
                 id,
-                time == null ? "00:00" : time,
-                fullName == null ? "" : fullName,
-                birthDate == null ? "" : birthDate,
+                time,
+                fullName,
+                birthDate,
                 type,
                 anamnesis == null ? "" : anamnesis,
                 "",
@@ -131,18 +143,10 @@ public class AddHandler implements RouteHandler {
                 appointmentDate.toString()
         );
 
-
         patients.addPatient(newPatient);
         patients.saveUsers();
 
-        Map<String, Object> modelDay = Map.of(
-                "date", appointmentDate.toString(),
-                "day", appointmentDate.getDayOfMonth(),
-                "month", appointmentDate.getMonthValue(),
-                "year", appointmentDate.getYear(),
-                "appointments", patients.getAllForDate(appointmentDate)
-        );
-
-        DoctorServer.renderTemplate(exchange, "day.html", modelDay);
+        exchange.getResponseHeaders().set("Location", "/day?date=" + appointmentDate);
+        exchange.sendResponseHeaders(303, -1);
     }
 }

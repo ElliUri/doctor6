@@ -3,6 +3,7 @@ package models;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import utils.Generator;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -16,6 +17,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class PatientDataModel {
 
@@ -30,7 +32,56 @@ public class PatientDataModel {
     private List<Patient> patients = new ArrayList<>();
 
     public PatientDataModel() {
+        generateTestPatients();
         loadPatiens();
+    }
+
+    private void generateTestPatients() {
+        Random r = new Random();
+        LocalDate today = LocalDate.now();
+
+        int daysInMonth = today.lengthOfMonth();
+        int currentDay = today.getDayOfMonth();
+        int remainingDays = daysInMonth - currentDay + 1;
+
+        for (int dayOffset = 1; dayOffset < remainingDays; dayOffset++) {
+            LocalDate appointmentDate = today.plusDays(dayOffset);
+
+            int patientsPerDay = 1 + r.nextInt(3);
+
+            for (int p = 0; p < patientsPerDay; p++) {
+                int hour = 9 + r.nextInt(8);
+                int minute = r.nextBoolean() ? 0 : 30;
+                String time = String.format("%02d:%02d", hour, minute);
+
+                PatientType type = r.nextBoolean() ?
+                        PatientType.PRIMARY : PatientType.SECONDARY;
+
+                int age = 20 + r.nextInt(20);
+                LocalDate birthDate = LocalDate.now().minusYears(age);
+
+                int id = patients.size() + 1;
+
+                Patient patient = new Patient(
+                        id,
+                        time,
+                        Generator.makeName(),
+                        birthDate.toString(),
+                        type,
+                        Generator.makeDescription(),
+                        "+996 " + (500000000 + r.nextInt(100000000)),
+                        "Бишкек, улица " + Generator.makeName(),
+                        appointmentDate.toString()
+                );
+
+                patients.add(patient);
+            }
+        }
+
+        System.out.println("Сгенерировано " + patients.size() + " тестовых пациентов");
+        System.out.println("Период: с " + today + " до " + today.plusDays(remainingDays - 1));
+
+        saveUsers(); // Сохраняем сгенерированные данные
     }
 
     private void loadPatiens() {
